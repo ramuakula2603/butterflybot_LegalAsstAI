@@ -1,0 +1,34 @@
+[
+  {
+    "legacy_code": "IPC",
+    "legacy_section": "302",
+    "new_code": "BNS",
+    "new_section": "103",
+    "title": "Punishment for murder",
+    "keywords": ["murder", "homicide", "intentional killing"]
+  },
+  {
+    "legacy_code": "IPC",
+    "legacy_section": "420",
+    "new_code": "BNS",
+    "new_section": "316",
+    "title": "Cheating and dishonestly inducing delivery of property",
+    "keywords": ["cheating", "fraud", "deception"]
+  },
+  {
+    "legacy_code": "CrPC",
+    "legacy_section": "438",
+    "new_code": "BNSS",
+    "new_section": "482",
+    "title": "Anticipatory bail",
+    "keywords": ["anticipatory bail", "pre-arrest bail", "bail"]
+  },
+  {
+    "legacy_code": "Evidence Act",
+    "legacy_section": "65B",
+    "new_code": "BSA",
+    "new_section": "63",
+    "title": "Admissibility of electronic records",
+    "keywords": ["electronic evidence", "65b certificate", "digital record"]
+  }
+]

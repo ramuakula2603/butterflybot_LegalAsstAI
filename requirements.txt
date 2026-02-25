@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+python-docx
+python-multipart
+psycopg2-binary
+pypdf
+PyMuPDF
+pytesseract
+Pillow
+beautifulsoup4
+apscheduler

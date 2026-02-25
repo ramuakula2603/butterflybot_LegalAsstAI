@@ -1,0 +1,760 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ButterflyBot Legal UI</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; background: #f6f7fb; color: #1f2937; }
+      .container { max-width: 980px; margin: 0 auto; padding: 24px; }
+      h1 { margin-top: 0; }
+      .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+      .row { display: flex; gap: 12px; flex-wrap: wrap; }
+      input, select, textarea, button { font: inherit; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; }
+      textarea { width: 100%; min-height: 90px; }
+      button { cursor: pointer; background: #111827; color: #fff; border-color: #111827; }
+      pre { background: #0b1020; color: #d1f4ff; padding: 12px; border-radius: 8px; overflow: auto; }
+      .muted { color: #6b7280; font-size: 14px; }
+      .grow { flex: 1; min-width: 220px; }
+      .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+      .badge { padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid transparent; }
+      .badge-ok { background: #ecfdf5; color: #166534; border-color: #86efac; }
+      .badge-fail { background: #fef2f2; color: #991b1b; border-color: #fca5a5; }
+      .badge-warn { background: #fffbeb; color: #92400e; border-color: #fcd34d; }
+      .badge-neutral { background: #f3f4f6; color: #374151; border-color: #d1d5db; }
+      .tiny { font-size: 12px; color: #6b7280; margin: 2px 0 10px; }
+      .status-line { display: flex; gap: 8px; align-items: center; margin: 2px 0 10px; }
+      .status-ok { color: #166534; }
+      .status-error { color: #991b1b; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>ButterflyBot Legal Assistant UI</h1>
+      <p class="muted">MVP interface for legal question analysis, precedent search, and FIR upload analysis.</p>
+
+      <section class="card">
+        <h3>Legal Question</h3>
+        <div class="row">
+          <input id="question" class="grow" placeholder="Enter legal question" />
+          <select id="courtLevel">
+            <option value="trial">Trial</option>
+            <option value="sessions">Sessions</option>
+            <option value="high">High Court</option>
+            <option value="supreme">Supreme Court</option>
+          </select>
+          <select id="state">
+            <option value="telangana">Telangana</option>
+            <option value="andhra pradesh">Andhra Pradesh</option>
+          </select>
+          <select id="district">
+            <option value="hyderabad">Hyderabad</option>
+            <option value="rangareddy">Rangareddy</option>
+            <option value="vijayawada">Vijayawada</option>
+            <option value="visakhapatnam">Visakhapatnam</option>
+          </select>
+          <select id="stage">
+            <option value="investigation">Investigation</option>
+            <option value="bail">Bail</option>
+            <option value="trial">Trial</option>
+          </select>
+          <select id="responseLanguage">
+            <option value="english">English</option>
+            <option value="telugu">Telugu-friendly</option>
+            <option value="bilingual">Bilingual</option>
+          </select>
+          <select id="templateType">
+            <option value="auto">Template: Auto</option>
+            <option value="bail_memo">Template: Bail Memo</option>
+            <option value="notice_reply">Template: Notice Reply</option>
+            <option value="quash_checklist">Template: Quash Checklist</option>
+          </select>
+          <button id="askBtn">Analyze</button>
+          <button id="toggleDraftBtn" type="button">Show Preview</button>
+          <button id="copyDraftBtn" type="button">Copy Draft</button>
+        </div>
+        <p id="copyDraftStatus" class="tiny">Draft status: run analysis to enable copy.</p>
+        <pre id="draftPreview" style="display:none;">Draft preview will appear here.</pre>
+        <pre id="legalOutput">Awaiting input...</pre>
+      </section>
+
+      <section class="card">
+        <h3>Instant Solve (Seconds)</h3>
+        <div class="row">
+          <input id="instantQuestion" class="grow" placeholder="Describe issue in one line (e.g. police notice in cheating complaint)" />
+          <select id="instantState">
+            <option value="telangana">Telangana</option>
+            <option value="andhra pradesh">Andhra Pradesh</option>
+          </select>
+          <select id="instantLanguage">
+            <option value="english">English</option>
+            <option value="telugu">Telugu-friendly</option>
+            <option value="bilingual">Bilingual</option>
+          </select>
+          <button id="instantSolveBtn">Instant Solve</button>
+        </div>
+        <p id="instantAutoStatus" class="tiny">Auto-run: On (after 1.5s pause)</p>
+        <pre id="instantOutput">Awaiting instant solve...</pre>
+      </section>
+
+      <section class="card">
+        <h3>Precedent Search</h3>
+        <div class="row">
+          <input id="precedentQuery" class="grow" placeholder="e.g. quashing FIR abuse of process under 482" />
+          <select id="precedentState">
+            <option value="telangana">Telangana</option>
+            <option value="andhra pradesh">Andhra Pradesh</option>
+          </select>
+          <input id="precedentLimit" type="number" min="1" max="20" value="5" style="width:90px" />
+          <button id="precedentBtn">Search</button>
+        </div>
+        <pre id="precedentOutput">Awaiting input...</pre>
+      </section>
+
+      <section class="card">
+        <h3>FIR Upload Analysis</h3>
+        <div class="row">
+          <select id="firState">
+            <option value="telangana">Telangana</option>
+            <option value="andhra pradesh">Andhra Pradesh</option>
+          </select>
+          <input id="firFile" type="file" accept=".txt,.docx,.pdf,.png,.jpg,.jpeg,.bmp,.tif,.tiff" class="grow" />
+          <button id="firBtn">Analyze FIR</button>
+        </div>
+        <pre id="firOutput">Awaiting file upload...</pre>
+      </section>
+
+      <section class="card">
+        <h3>Case History</h3>
+        <div class="row">
+          <input id="caseTitle" class="grow" placeholder="Case title" />
+          <input id="clientName" placeholder="Client name" />
+          <select id="caseType">
+            <option value="criminal">Criminal</option>
+            <option value="civil">Civil</option>
+          </select>
+          <select id="caseCourtLevel">
+            <option value="trial">Trial</option>
+            <option value="sessions">Sessions</option>
+            <option value="high">High Court</option>
+            <option value="supreme">Supreme Court</option>
+          </select>
+          <select id="caseState">
+            <option value="telangana">Telangana</option>
+            <option value="andhra pradesh">Andhra Pradesh</option>
+          </select>
+        </div>
+        <div class="row">
+          <textarea id="caseFacts" class="grow" placeholder="Facts summary"></textarea>
+        </div>
+        <div class="row">
+          <button id="createCaseBtn">Create Case</button>
+          <button id="updateCaseBtn">Update Case</button>
+          <input id="caseLimit" type="number" min="1" max="50" value="10" style="width:90px" />
+          <button id="listCasesBtn">List Cases</button>
+          <input id="caseId" type="number" min="1" placeholder="Case ID" style="width:110px" />
+          <button id="getCaseBtn">Get Case</button>
+          <button id="deleteCaseBtn">Delete Case</button>
+        </div>
+        <pre id="caseOutput">Awaiting case action...</pre>
+      </section>
+
+      <section class="card">
+        <h3>Scheduler Admin</h3>
+        <div id="schedulerBadges" class="badges">
+          <span class="badge badge-neutral">Scheduler: Unknown</span>
+          <span class="badge badge-neutral">Last Run: Unknown</span>
+          <span class="badge badge-neutral">Last Inserted: 0</span>
+        </div>
+        <div class="status-line">
+          <div id="schedulerAgo" class="tiny" style="margin:0;">Last run: unknown</div>
+          <span id="autoRefreshBadge" class="badge badge-ok">Auto-refresh: On (30s)</span>
+        </div>
+        <div id="schedulerPollError" class="tiny">Last poll status: healthy</div>
+        <div class="row">
+          <button id="schedulerStatusBtn">Load Status</button>
+          <button id="schedulerRunBtn">Run Refresh Now</button>
+          <input id="schedulerLimit" type="number" min="1" max="100" value="20" style="width:90px" />
+          <button id="schedulerRunsBtn">Load Run Logs</button>
+        </div>
+        <pre id="schedulerOutput">Awaiting scheduler action...</pre>
+      </section>
+
+      <section class="card">
+        <h3>Data Quality Dashboard</h3>
+        <div class="row">
+          <button id="qualityLoadBtn">Load Data Quality</button>
+        </div>
+        <pre id="qualityOutput">Awaiting data quality load...</pre>
+      </section>
+    </div>
+
+    <script>
+      async function postJson(url, payload) {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+      }
+
+      let lastSchedulerRunIso = null;
+      let schedulerPollFailures = 0;
+      let latestLegalDraftText = '';
+      let isDraftPreviewVisible = false;
+      let instantDebounceTimer = null;
+      let latestInstantRequestId = 0;
+
+      function updateDraftStatus(message) {
+        const el = document.getElementById('copyDraftStatus');
+        if (el) {
+          el.textContent = message;
+        }
+      }
+
+      function setDraftPreview(text, visible) {
+        const preview = document.getElementById('draftPreview');
+        const toggleBtn = document.getElementById('toggleDraftBtn');
+        if (!preview) return;
+        preview.textContent = text || 'Draft preview will appear here.';
+        preview.style.display = visible ? 'block' : 'none';
+        isDraftPreviewVisible = Boolean(visible);
+        if (toggleBtn) {
+          toggleBtn.textContent = isDraftPreviewVisible ? 'Hide Preview' : 'Show Preview';
+        }
+      }
+
+      function setSchedulerPollError(message) {
+        const errorEl = document.getElementById('schedulerPollError');
+        if (!errorEl) return;
+        const timeLabel = new Date().toLocaleTimeString();
+        if (!message) {
+          errorEl.classList.remove('status-error');
+          errorEl.classList.add('status-ok');
+          errorEl.textContent = `Last poll status at ${timeLabel}: healthy`;
+          return;
+        }
+        errorEl.classList.remove('status-ok');
+        errorEl.classList.add('status-error');
+        errorEl.textContent = `⚠ Last poll error at ${timeLabel}: ${message}`;
+      }
+
+      function setAutoRefreshBadge(isOn, details) {
+        const badge = document.getElementById('autoRefreshBadge');
+        if (!badge) return;
+
+        if (isOn) {
+          badge.className = 'badge badge-ok';
+          badge.textContent = details ? `Auto-refresh: On (30s, ${details})` : 'Auto-refresh: On (30s)';
+          return;
+        }
+
+        badge.className = 'badge badge-fail';
+        badge.textContent = details ? `Auto-refresh: Off (${details})` : 'Auto-refresh: Off';
+      }
+
+      function setSchedulerAgo(isoValue) {
+        lastSchedulerRunIso = isoValue || null;
+        document.getElementById('schedulerAgo').textContent = `Last run: ${relativeTime(lastSchedulerRunIso)}`;
+      }
+
+      async function loadSchedulerStatus(showOutput) {
+        const output = document.getElementById('schedulerOutput');
+        if (showOutput) {
+          output.textContent = 'Loading status...';
+        }
+
+        const res = await fetch('/api/v1/admin/scheduler/status');
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        renderSchedulerBadgesFromStatus(data);
+        schedulerPollFailures = 0;
+        setAutoRefreshBadge(true);
+        setSchedulerPollError(null);
+
+        if (showOutput) {
+          output.textContent = JSON.stringify(data, null, 2);
+        }
+
+        return data;
+      }
+
+      document.getElementById('askBtn').addEventListener('click', async () => {
+        const output = document.getElementById('legalOutput');
+        output.textContent = 'Loading...';
+        latestLegalDraftText = '';
+        setDraftPreview('', false);
+        updateDraftStatus('Draft status: generating...');
+        try {
+          const data = await postJson('/api/v1/legal/question', {
+            question: document.getElementById('question').value,
+            court_level: document.getElementById('courtLevel').value,
+            state: document.getElementById('state').value,
+            district: document.getElementById('district').value,
+            stage: document.getElementById('stage').value,
+            response_language: document.getElementById('responseLanguage').value,
+            template_type: document.getElementById('templateType').value
+          });
+
+          const templates = Array.isArray(data.filing_templates) ? data.filing_templates : [];
+          const draftBlocks = templates
+            .map((item) => item && item.draft_text)
+            .filter((item) => typeof item === 'string' && item.trim().length > 0);
+          latestLegalDraftText = draftBlocks.join('\n\n--------------------\n\n');
+          if (latestLegalDraftText) {
+            updateDraftStatus(`Draft status: ready (${draftBlocks.length} template${draftBlocks.length > 1 ? 's' : ''}).`);
+            setDraftPreview(latestLegalDraftText, false);
+          } else {
+            updateDraftStatus('Draft status: no template draft text returned.');
+            setDraftPreview('', false);
+          }
+
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (e) {
+          updateDraftStatus('Draft status: failed to generate draft.');
+          setDraftPreview('', false);
+          output.textContent = 'Error: ' + e.message;
+        }
+      });
+
+      document.getElementById('toggleDraftBtn').addEventListener('click', () => {
+        if (!latestLegalDraftText) {
+          updateDraftStatus('Draft status: no draft available. Run analysis first.');
+          setDraftPreview('', false);
+          return;
+        }
+        const nextVisible = !isDraftPreviewVisible;
+        setDraftPreview(latestLegalDraftText, nextVisible);
+        updateDraftStatus(nextVisible ? 'Draft status: preview shown.' : 'Draft status: preview hidden.');
+      });
+
+      document.getElementById('copyDraftBtn').addEventListener('click', async () => {
+        if (!latestLegalDraftText) {
+          updateDraftStatus('Draft status: no draft available. Run analysis first.');
+          return;
+        }
+
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(latestLegalDraftText);
+          } else {
+            const fallback = document.createElement('textarea');
+            fallback.value = latestLegalDraftText;
+            document.body.appendChild(fallback);
+            fallback.select();
+            document.execCommand('copy');
+            document.body.removeChild(fallback);
+          }
+          updateDraftStatus('Draft status: copied to clipboard.');
+        } catch (_e) {
+          updateDraftStatus('Draft status: copy failed. Please copy from output manually.');
+        }
+      });
+
+      document.getElementById('precedentBtn').addEventListener('click', async () => {
+        const output = document.getElementById('precedentOutput');
+        output.textContent = 'Loading...';
+        try {
+          const data = await postJson('/api/v1/precedents/search', {
+            query: document.getElementById('precedentQuery').value,
+            state: document.getElementById('precedentState').value,
+            limit: Number(document.getElementById('precedentLimit').value || 5)
+          });
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (e) {
+          output.textContent = 'Error: ' + e.message;
+        }
+      });
+
+      async function runInstantSolve(options) {
+        const opts = options || {};
+        const output = document.getElementById('instantOutput');
+        const status = document.getElementById('instantAutoStatus');
+        const question = document.getElementById('instantQuestion').value.trim();
+        const state = document.getElementById('instantState').value;
+        const responseLanguage = document.getElementById('instantLanguage').value;
+
+        if (question.length < 5) {
+          output.textContent = 'Enter at least 5 characters to run instant solve.';
+          if (status) status.textContent = 'Auto-run: waiting for enough input...';
+          return;
+        }
+
+        const requestId = ++latestInstantRequestId;
+        output.textContent = opts.silent ? 'Auto-solving...' : 'Solving in seconds...';
+        if (status) status.textContent = opts.silent ? 'Auto-run: solving...' : 'Auto-run: manual run in progress...';
+        try {
+          const data = await postJson('/api/v1/legal/instant-solve', {
+            question,
+            state,
+            response_language: responseLanguage
+          });
+
+          try {
+            localStorage.setItem('butterflybot.instant.question', question);
+            localStorage.setItem('butterflybot.instant.state', state);
+            localStorage.setItem('butterflybot.instant.language', responseLanguage);
+          } catch (_storageError) {
+          }
+
+          if (requestId !== latestInstantRequestId) {
+            return;
+          }
+
+          output.textContent = JSON.stringify(data, null, 2);
+          if (status) status.textContent = 'Auto-run: up to date';
+
+          if (data && data.draft_preview && typeof data.draft_preview === 'string') {
+            latestLegalDraftText = data.draft_preview;
+            updateDraftStatus('Draft status: ready from instant solve.');
+            if (isDraftPreviewVisible) {
+              setDraftPreview(latestLegalDraftText, true);
+            }
+          }
+        } catch (e) {
+          if (requestId !== latestInstantRequestId) {
+            return;
+          }
+          output.textContent = 'Error: ' + e.message;
+          if (status) status.textContent = 'Auto-run: error';
+        }
+      }
+
+      function scheduleInstantAutoSolve() {
+        if (instantDebounceTimer) {
+          clearTimeout(instantDebounceTimer);
+        }
+        const status = document.getElementById('instantAutoStatus');
+        if (status) status.textContent = 'Auto-run: waiting 1.5s...';
+        instantDebounceTimer = setTimeout(() => {
+          runInstantSolve({ silent: true });
+        }, 1500);
+      }
+
+      document.getElementById('instantSolveBtn').addEventListener('click', async () => {
+        if (instantDebounceTimer) {
+          clearTimeout(instantDebounceTimer);
+        }
+        await runInstantSolve({ silent: false });
+      });
+
+      document.getElementById('instantQuestion').addEventListener('input', scheduleInstantAutoSolve);
+      document.getElementById('instantState').addEventListener('change', scheduleInstantAutoSolve);
+      document.getElementById('instantLanguage').addEventListener('change', scheduleInstantAutoSolve);
+
+      function runInstantDemoPrefetch() {
+        const questionEl = document.getElementById('instantQuestion');
+        const stateEl = document.getElementById('instantState');
+        const languageEl = document.getElementById('instantLanguage');
+        const status = document.getElementById('instantAutoStatus');
+        if (!questionEl || !stateEl || !languageEl) return;
+
+        if (questionEl.value.trim().length > 0) {
+          if (status) status.textContent = 'Auto-run: On (after 1.5s pause)';
+          return;
+        }
+
+        let storedQuestion = '';
+        let storedState = '';
+        let storedLanguage = '';
+
+        try {
+          storedQuestion = (localStorage.getItem('butterflybot.instant.question') || '').trim();
+          storedState = (localStorage.getItem('butterflybot.instant.state') || '').trim();
+          storedLanguage = (localStorage.getItem('butterflybot.instant.language') || '').trim();
+        } catch (_storageError) {
+        }
+
+        if (!storedQuestion) {
+          if (status) status.textContent = 'Auto-run: On (after 1.5s pause)';
+          return;
+        }
+
+        questionEl.value = storedQuestion;
+        if (storedState) {
+          stateEl.value = storedState;
+        }
+        if (storedLanguage) {
+          languageEl.value = storedLanguage;
+        }
+
+        if (status) status.textContent = 'Auto-run: loading last case...';
+        runInstantSolve({ silent: true });
+      }
+
+      document.getElementById('firBtn').addEventListener('click', async () => {
+        const output = document.getElementById('firOutput');
+        output.textContent = 'Uploading...';
+        try {
+          const fileInput = document.getElementById('firFile');
+          if (!fileInput.files || fileInput.files.length === 0) {
+            output.textContent = 'Please select a file first.';
+            return;
+          }
+          const form = new FormData();
+          form.append('state', document.getElementById('firState').value);
+          form.append('file', fileInput.files[0]);
+          const res = await fetch('/api/v1/fir/analyze', { method: 'POST', body: form });
+          if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (e) {
+          output.textContent = 'Error: ' + e.message;
+        }
+      });
+
+      document.getElementById('createCaseBtn').addEventListener('click', async () => {
+        const output = document.getElementById('caseOutput');
+        output.textContent = 'Creating...';
+        try {
+          const data = await postJson('/api/v1/cases', {
+            case_title: document.getElementById('caseTitle').value,
+            client_name: document.getElementById('clientName').value,
+            case_type: document.getElementById('caseType').value,
+            court_level: document.getElementById('caseCourtLevel').value,
+            state: document.getElementById('caseState').value,
+            facts_summary: document.getElementById('caseFacts').value
+          });
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (e) {
+          output.textContent = 'Error: ' + e.message;
+        }
+      });
+
+      document.getElementById('listCasesBtn').addEventListener('click', async () => {
+        const output = document.getElementById('caseOutput');
+        output.textContent = 'Loading...';
+        try {
+          const limit = Number(document.getElementById('caseLimit').value || 10);
+          const res = await fetch(`/api/v1/cases?limit=${limit}`);
+          if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (e) {
+          output.textContent = 'Error: ' + e.message;
+        }
+      });
+
+      document.getElementById('getCaseBtn').addEventListener('click', async () => {
+        const output = document.getElementById('caseOutput');
+        output.textContent = 'Loading...';
+        try {
+          const caseId = Number(document.getElementById('caseId').value || 0);
+          if (!caseId) {
+            output.textContent = 'Please enter a valid Case ID.';
+            return;
+          }
+
+          const res = await fetch(`/api/v1/cases/${caseId}`);
+          if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (e) {
+          output.textContent = 'Error: ' + e.message;
+        }
+      });
+
+      document.getElementById('updateCaseBtn').addEventListener('click', async () => {
+        const output = document.getElementById('caseOutput');
+        output.textContent = 'Updating...';
+        try {
+          const caseId = Number(document.getElementById('caseId').value || 0);
+          if (!caseId) {
+            output.textContent = 'Please enter a valid Case ID for update.';
+            return;
+          }
+
+          const payload = {
+            case_title: document.getElementById('caseTitle').value,
+            client_name: document.getElementById('clientName').value,
+            case_type: document.getElementById('caseType').value,
+            court_level: document.getElementById('caseCourtLevel').value,
+            state: document.getElementById('caseState').value,
+            facts_summary: document.getElementById('caseFacts').value
+          };
+
+          const res = await fetch(`/api/v1/cases/${caseId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (e) {
+          output.textContent = 'Error: ' + e.message;
+        }
+      });
+
+      document.getElementById('deleteCaseBtn').addEventListener('click', async () => {
+        const output = document.getElementById('caseOutput');
+        output.textContent = 'Deleting...';
+        try {
+          const caseId = Number(document.getElementById('caseId').value || 0);
+          if (!caseId) {
+            output.textContent = 'Please enter a valid Case ID for delete.';
+            return;
+          }
+
+          const res = await fetch(`/api/v1/cases/${caseId}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (e) {
+          output.textContent = 'Error: ' + e.message;
+        }
+      });
+
+      document.getElementById('schedulerStatusBtn').addEventListener('click', async () => {
+        const output = document.getElementById('schedulerOutput');
+        try {
+          await loadSchedulerStatus(true);
+        } catch (e) {
+          output.textContent = 'Error: ' + e.message;
+        }
+      });
+
+      document.getElementById('schedulerRunBtn').addEventListener('click', async () => {
+        const output = document.getElementById('schedulerOutput');
+        output.textContent = 'Running refresh...';
+        try {
+          const res = await fetch('/api/v1/admin/scheduler/run-once', { method: 'POST' });
+          if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          renderSchedulerBadgesFromRun(data);
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (e) {
+          output.textContent = 'Error: ' + e.message;
+        }
+      });
+
+      document.getElementById('schedulerRunsBtn').addEventListener('click', async () => {
+        const output = document.getElementById('schedulerOutput');
+        output.textContent = 'Loading runs...';
+        try {
+          const limit = Number(document.getElementById('schedulerLimit').value || 20);
+          const res = await fetch(`/api/v1/admin/scheduler/runs?limit=${limit}`);
+          if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          renderSchedulerBadgesFromRuns(data);
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (e) {
+          output.textContent = 'Error: ' + e.message;
+        }
+      });
+
+      document.getElementById('qualityLoadBtn').addEventListener('click', async () => {
+        const output = document.getElementById('qualityOutput');
+        output.textContent = 'Loading data quality...';
+        try {
+          const res = await fetch('/api/v1/admin/data-quality');
+          if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (e) {
+          output.textContent = 'Error: ' + e.message;
+        }
+      });
+
+      function renderSchedulerBadgesFromStatus(status) {
+        const schedulerRunning = Boolean(status.running && status.enabled);
+        const hasFailures = Array.isArray(status.last_failed_urls) && status.last_failed_urls.length > 0;
+
+        const schedulerBadge = schedulerRunning
+          ? '<span class="badge badge-ok">Scheduler: Running</span>'
+          : '<span class="badge badge-warn">Scheduler: Paused/Disabled</span>';
+
+        const lastRunBadge = hasFailures
+          ? '<span class="badge badge-fail">Last Run: Issues</span>'
+          : (status.last_run_at ? '<span class="badge badge-ok">Last Run: Success</span>' : '<span class="badge badge-neutral">Last Run: Not yet</span>');
+
+        const inserted = Number(status.last_inserted || 0);
+        const insertedBadge = inserted > 0
+          ? `<span class="badge badge-ok">Last Inserted: ${inserted}</span>`
+          : '<span class="badge badge-neutral">Last Inserted: 0</span>';
+
+        document.getElementById('schedulerBadges').innerHTML = `${schedulerBadge}${lastRunBadge}${insertedBadge}`;
+        setSchedulerAgo(status.last_run_at);
+      }
+
+      function renderSchedulerBadgesFromRun(runResult) {
+        const failed = Array.isArray(runResult.failed_urls) && runResult.failed_urls.length > 0;
+        const runBadge = failed
+          ? '<span class="badge badge-fail">Last Run: Issues</span>'
+          : '<span class="badge badge-ok">Last Run: Success</span>';
+
+        const inserted = Number(runResult.inserted || 0);
+        const insertedBadge = inserted > 0
+          ? `<span class="badge badge-ok">Last Inserted: ${inserted}</span>`
+          : '<span class="badge badge-neutral">Last Inserted: 0</span>';
+
+        document.getElementById('schedulerBadges').innerHTML = `<span class="badge badge-ok">Scheduler: Running</span>${runBadge}${insertedBadge}`;
+        const nowIso = new Date().toISOString();
+        setSchedulerAgo(nowIso);
+      }
+
+      function renderSchedulerBadgesFromRuns(runsPayload) {
+        const run = runsPayload && Array.isArray(runsPayload.runs) && runsPayload.runs.length > 0 ? runsPayload.runs[0] : null;
+        if (!run) {
+          document.getElementById('schedulerBadges').innerHTML = '<span class="badge badge-warn">Scheduler: No run history</span><span class="badge badge-neutral">Last Run: Unknown</span><span class="badge badge-neutral">Last Inserted: 0</span>';
+          setSchedulerAgo(null);
+          return;
+        }
+
+        const statusClass = run.status === 'success' ? 'badge-ok' : (run.status === 'failed' || run.status === 'error' ? 'badge-fail' : 'badge-warn');
+        const inserted = Number(run.inserted_count || 0);
+        const insertedClass = inserted > 0 ? 'badge-ok' : 'badge-neutral';
+
+        document.getElementById('schedulerBadges').innerHTML = `
+          <span class="badge badge-ok">Scheduler: Running</span>
+          <span class="badge ${statusClass}">Last Run: ${run.status}</span>
+          <span class="badge ${insertedClass}">Last Inserted: ${inserted}</span>
+        `;
+        setSchedulerAgo(run.ended_at || run.started_at);
+      }
+
+      function relativeTime(isoValue) {
+        if (!isoValue) return 'unknown';
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return 'unknown';
+
+        const diffMs = Date.now() - date.getTime();
+        if (diffMs < 0) return 'just now';
+
+        const mins = Math.floor(diffMs / 60000);
+        if (mins < 1) return 'just now';
+        if (mins < 60) return `${mins} min ago`;
+
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return `${hrs} hr ago`;
+
+        const days = Math.floor(hrs / 24);
+        return `${days} day ago`;
+      }
+
+      setInterval(() => {
+        if (lastSchedulerRunIso) {
+          document.getElementById('schedulerAgo').textContent = `Last run: ${relativeTime(lastSchedulerRunIso)}`;
+        }
+      }, 30000);
+
+      setInterval(async () => {
+        try {
+          await loadSchedulerStatus(false);
+        } catch (_e) {
+          schedulerPollFailures += 1;
+          const message = _e && _e.message ? _e.message : 'unknown error';
+          setSchedulerPollError(message);
+          if (schedulerPollFailures >= 3) {
+            setAutoRefreshBadge(false, `${schedulerPollFailures} failed polls`);
+          }
+        }
+      }, 30000);
+
+      runInstantDemoPrefetch();
+      document.getElementById('schedulerStatusBtn').click();
+    </script>
+  </body>
+</html>

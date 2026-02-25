@@ -1,0 +1,34 @@
+[
+  {
+    "title": "Arnesh Kumar v. State of Bihar",
+    "citation": "(2014) 8 SCC 273",
+    "court": "Supreme Court of India",
+    "year": 2014,
+    "topics": ["arrest", "bail", "criminal procedure", "section 41A"],
+    "snippet": "The Court directed strict compliance with Section 41 and 41A CrPC safeguards to prevent unnecessary arrests."
+  },
+  {
+    "title": "State of Haryana v. Bhajan Lal",
+    "citation": "1992 Supp (1) SCC 335",
+    "court": "Supreme Court of India",
+    "year": 1992,
+    "topics": ["quashing", "FIR", "abuse of process", "482"],
+    "snippet": "The judgment outlines categories where criminal proceedings may be quashed to prevent abuse of process."
+  },
+  {
+    "title": "K. Chinnaswamy Reddy v. State of Andhra Pradesh",
+    "citation": "AIR 1962 SC 1788",
+    "court": "Supreme Court of India",
+    "year": 1962,
+    "topics": ["revision", "criminal law", "procedural justice"],
+    "snippet": "Revisional jurisdiction is to be exercised sparingly to cure grave miscarriage of justice."
+  },
+  {
+    "title": "Sharad Birdhichand Sarda v. State of Maharashtra",
+    "citation": "(1984) 4 SCC 116",
+    "court": "Supreme Court of India",
+    "year": 1984,
+    "topics": ["circumstantial evidence", "criminal trial", "burden of proof"],
+    "snippet": "Circumstantial evidence must be fully established and consistent only with the guilt of the accused."
+  }
+]
