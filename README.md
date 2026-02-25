@@ -14,7 +14,7 @@ Production-focused legal assistant for Andhra Pradesh and Telangana with real-da
 - FIR analysis (txt/docx/pdf/image OCR)
 - Case history CRUD
 - Scheduler for daily source refresh
-- Data Quality Dashboard (`/api/v1/admin/data-quality`)
+- Data Quality Dashboard (`/api/v1/admin/data-quality`) + history (`/api/v1/admin/data-quality/history`)
 
 ## Real-data and production safeguards
 
@@ -78,6 +78,7 @@ Run and start API in one step on Windows:
 - UI: `http://127.0.0.1:8001/ui`
 - Health: `http://127.0.0.1:8001/health`
 - Data quality: `http://127.0.0.1:8001/api/v1/admin/data-quality`
+- Data quality history: `http://127.0.0.1:8001/api/v1/admin/data-quality/history?limit=20`
 
 ## Key endpoints
 
@@ -94,6 +95,7 @@ Run and start API in one step on Windows:
 - `POST /api/v1/admin/scheduler/run-once`
 - `GET /api/v1/admin/scheduler/runs`
 - `GET /api/v1/admin/data-quality`
+- `GET /api/v1/admin/data-quality/history`
 
 ## Notes
 

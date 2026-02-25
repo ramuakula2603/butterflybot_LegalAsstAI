@@ -37,23 +37,29 @@ class CaseHistoryService:
             case_type TEXT NOT NULL,
             court_level TEXT NOT NULL,
             state TEXT NOT NULL,
+            case_district TEXT NOT NULL DEFAULT '',
             facts_summary TEXT NOT NULL,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
+        """
+        migration = """
+        ALTER TABLE case_history
+        ADD COLUMN IF NOT EXISTS case_district TEXT NOT NULL DEFAULT '';
         """
 
         with self._connect() as connection:
             with connection.cursor() as cursor:
                 cursor.execute(statement)
+                cursor.execute(migration)
                 connection.commit()
 
     def create_case(self, payload: dict) -> dict:
         insert_sql = """
         INSERT INTO case_history (
-            case_title, client_name, case_type, court_level, state, facts_summary
+            case_title, client_name, case_type, court_level, state, case_district, facts_summary
         )
-        VALUES (%(case_title)s, %(client_name)s, %(case_type)s, %(court_level)s, %(state)s, %(facts_summary)s)
-        RETURNING id, case_title, client_name, case_type, court_level, state, facts_summary, created_at;
+        VALUES (%(case_title)s, %(client_name)s, %(case_type)s, %(court_level)s, %(state)s, %(case_district)s, %(facts_summary)s)
+        RETURNING id, case_title, client_name, case_type, court_level, state, case_district, facts_summary, created_at;
         """
 
         with self._connect() as connection:
@@ -65,7 +71,7 @@ class CaseHistoryService:
 
     def list_cases(self, limit: int = 20) -> list[dict]:
         query = """
-        SELECT id, case_title, client_name, case_type, court_level, state, facts_summary, created_at
+        SELECT id, case_title, client_name, case_type, court_level, state, case_district, facts_summary, created_at
         FROM case_history
         ORDER BY created_at DESC
         LIMIT %s;
@@ -79,7 +85,7 @@ class CaseHistoryService:
 
     def get_case(self, case_id: int) -> dict | None:
         query = """
-        SELECT id, case_title, client_name, case_type, court_level, state, facts_summary, created_at
+        SELECT id, case_title, client_name, case_type, court_level, state, case_district, facts_summary, created_at
         FROM case_history
         WHERE id = %s;
         """
@@ -99,9 +105,10 @@ class CaseHistoryService:
             case_type = %(case_type)s,
             court_level = %(court_level)s,
             state = %(state)s,
+            case_district = %(case_district)s,
             facts_summary = %(facts_summary)s
         WHERE id = %(case_id)s
-        RETURNING id, case_title, client_name, case_type, court_level, state, facts_summary, created_at;
+        RETURNING id, case_title, client_name, case_type, court_level, state, case_district, facts_summary, created_at;
         """
 
         with self._connect() as connection:

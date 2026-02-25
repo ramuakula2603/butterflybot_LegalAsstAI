@@ -45,6 +45,7 @@ class CaseCreateRequest(BaseModel):
     case_type: str = Field(default="criminal")
     court_level: str = Field(default="trial")
     state: str = Field(default="unknown")
+    case_district: str = Field(default="")
     facts_summary: str = Field(..., min_length=10)
 
 
@@ -55,6 +56,7 @@ class CaseResponse(BaseModel):
     case_type: str
     court_level: str
     state: str
+    case_district: str
     facts_summary: str
     created_at: str
 
@@ -65,6 +67,7 @@ class CaseUpdateRequest(BaseModel):
     case_type: str = Field(default="criminal")
     court_level: str = Field(default="trial")
     state: str = Field(default="unknown")
+    case_district: str = Field(default="")
     facts_summary: str = Field(..., min_length=10)
 
 

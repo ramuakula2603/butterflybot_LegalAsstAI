@@ -143,6 +143,10 @@
             <option value="telangana">Telangana</option>
             <option value="andhra pradesh">Andhra Pradesh</option>
           </select>
+          <select id="caseDistrict">
+            <option value="hyderabad">Hyderabad</option>
+            <option value="rangareddy">Rangareddy</option>
+          </select>
         </div>
         <div class="row">
           <textarea id="caseFacts" class="grow" placeholder="Facts summary"></textarea>
@@ -184,6 +188,8 @@
         <h3>Data Quality Dashboard</h3>
         <div class="row">
           <button id="qualityLoadBtn">Load Data Quality</button>
+          <input id="qualityHistoryLimit" type="number" min="1" max="100" value="20" style="width:90px" />
+          <button id="qualityHistoryBtn">Load Quality History</button>
         </div>
         <pre id="qualityOutput">Awaiting data quality load...</pre>
       </section>
@@ -206,6 +212,16 @@
       let isDraftPreviewVisible = false;
       let instantDebounceTimer = null;
       let latestInstantRequestId = 0;
+      const stateDistrictOptions = {
+        'telangana': [
+          { value: 'hyderabad', label: 'Hyderabad' },
+          { value: 'rangareddy', label: 'Rangareddy' }
+        ],
+        'andhra pradesh': [
+          { value: 'vijayawada', label: 'Vijayawada' },
+          { value: 'visakhapatnam', label: 'Visakhapatnam' }
+        ]
+      };
 
       function updateDraftStatus(message) {
         const el = document.getElementById('copyDraftStatus');
@@ -258,6 +274,30 @@
       function setSchedulerAgo(isoValue) {
         lastSchedulerRunIso = isoValue || null;
         document.getElementById('schedulerAgo').textContent = `Last run: ${relativeTime(lastSchedulerRunIso)}`;
+      }
+
+      function syncDistrictOptionsByState(stateId, districtId) {
+        const stateEl = document.getElementById(stateId);
+        const districtEl = document.getElementById(districtId);
+        if (!stateEl || !districtEl) return;
+
+        const selectedState = (stateEl.value || '').toLowerCase();
+        const nextOptions = stateDistrictOptions[selectedState] || [];
+        const previousDistrict = districtEl.value;
+
+        districtEl.innerHTML = '';
+        nextOptions.forEach((item) => {
+          const option = document.createElement('option');
+          option.value = item.value;
+          option.textContent = item.label;
+          districtEl.appendChild(option);
+        });
+
+        if (nextOptions.some((item) => item.value === previousDistrict)) {
+          districtEl.value = previousDistrict;
+        } else if (nextOptions.length > 0) {
+          districtEl.value = nextOptions[0].value;
+        }
       }
 
       async function loadSchedulerStatus(showOutput) {
@@ -443,6 +483,8 @@
       document.getElementById('instantQuestion').addEventListener('input', scheduleInstantAutoSolve);
       document.getElementById('instantState').addEventListener('change', scheduleInstantAutoSolve);
       document.getElementById('instantLanguage').addEventListener('change', scheduleInstantAutoSolve);
+      document.getElementById('state').addEventListener('change', () => syncDistrictOptionsByState('state', 'district'));
+      document.getElementById('caseState').addEventListener('change', () => syncDistrictOptionsByState('caseState', 'caseDistrict'));
 
       function runInstantDemoPrefetch() {
         const questionEl = document.getElementById('instantQuestion');
@@ -515,6 +557,7 @@
             case_type: document.getElementById('caseType').value,
             court_level: document.getElementById('caseCourtLevel').value,
             state: document.getElementById('caseState').value,
+            case_district: document.getElementById('caseDistrict').value,
             facts_summary: document.getElementById('caseFacts').value
           });
           output.textContent = JSON.stringify(data, null, 2);
@@ -572,6 +615,7 @@
             case_type: document.getElementById('caseType').value,
             court_level: document.getElementById('caseCourtLevel').value,
             state: document.getElementById('caseState').value,
+            case_district: document.getElementById('caseDistrict').value,
             facts_summary: document.getElementById('caseFacts').value
           };
 
@@ -650,6 +694,20 @@
         output.textContent = 'Loading data quality...';
         try {
           const res = await fetch('/api/v1/admin/data-quality');
+          if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (e) {
+          output.textContent = 'Error: ' + e.message;
+        }
+      });
+
+      document.getElementById('qualityHistoryBtn').addEventListener('click', async () => {
+        const output = document.getElementById('qualityOutput');
+        output.textContent = 'Loading data quality history...';
+        try {
+          const limit = Number(document.getElementById('qualityHistoryLimit').value || 20);
+          const res = await fetch(`/api/v1/admin/data-quality/history?limit=${limit}`);
           if (!res.ok) throw new Error(await res.text());
           const data = await res.json();
           output.textContent = JSON.stringify(data, null, 2);
@@ -754,6 +812,8 @@
       }, 30000);
 
       runInstantDemoPrefetch();
+      syncDistrictOptionsByState('state', 'district');
+      syncDistrictOptionsByState('caseState', 'caseDistrict');
       document.getElementById('schedulerStatusBtn').click();
     </script>
   </body>

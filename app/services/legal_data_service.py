@@ -128,6 +128,23 @@ class LegalDataService:
                 error_message TEXT
             );
             """,
+            """
+            CREATE TABLE IF NOT EXISTS data_quality_history (
+                id SERIAL PRIMARY KEY,
+                captured_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                source TEXT NOT NULL,
+                run_id INT,
+                total_precedent_records INT NOT NULL DEFAULT 0,
+                trusted_source_records INT NOT NULL DEFAULT 0,
+                high_quality_records INT NOT NULL DEFAULT 0,
+                rejected_or_low_quality_records INT NOT NULL DEFAULT 0,
+                trusted_source_pct NUMERIC(6, 2) NOT NULL DEFAULT 0,
+                high_quality_pct NUMERIC(6, 2) NOT NULL DEFAULT 0,
+                scheduler_urls_attempted INT NOT NULL DEFAULT 0,
+                scheduler_records_inserted INT NOT NULL DEFAULT 0,
+                scheduler_url_failures INT NOT NULL DEFAULT 0
+            );
+            """,
         ]
 
         with self._connect() as connection:
@@ -459,7 +476,7 @@ class LegalDataService:
                 rows = cursor.fetchall()
                 return [dict(row) for row in rows]
 
-    def data_quality_summary(self) -> dict:
+    def data_quality_summary(self, *, capture_snapshot: bool = False, source: str = "manual", run_id: int | None = None) -> dict:
         query = """
         SELECT state, title, citation, snippet, source_url
         FROM precedent_corpus;
@@ -519,7 +536,7 @@ class LegalDataService:
         scheduler_attempted_urls = sum(int(item.get("urls_attempted") or 0) for item in recent_runs)
         scheduler_inserted = sum(int(item.get("inserted_count") or 0) for item in recent_runs)
 
-        return {
+        summary = {
             "total_precedent_records": total_records,
             "trusted_source_records": trusted_records,
             "high_quality_records": high_quality_records,
@@ -534,3 +551,78 @@ class LegalDataService:
                 "url_failures": scheduler_failures,
             },
         }
+
+        if capture_snapshot:
+            self.record_data_quality_snapshot(summary=summary, source=source, run_id=run_id)
+
+        return summary
+
+    def record_data_quality_snapshot(self, *, summary: dict, source: str, run_id: int | None = None) -> int:
+        scheduler_rollup = summary.get("scheduler_20_runs") or {}
+
+        sql = """
+        INSERT INTO data_quality_history (
+            source,
+            run_id,
+            total_precedent_records,
+            trusted_source_records,
+            high_quality_records,
+            rejected_or_low_quality_records,
+            trusted_source_pct,
+            high_quality_pct,
+            scheduler_urls_attempted,
+            scheduler_records_inserted,
+            scheduler_url_failures
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        RETURNING id;
+        """
+
+        with self._connect() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    sql,
+                    (
+                        source[:80] if source else "manual",
+                        run_id,
+                        int(summary.get("total_precedent_records") or 0),
+                        int(summary.get("trusted_source_records") or 0),
+                        int(summary.get("high_quality_records") or 0),
+                        int(summary.get("rejected_or_low_quality_records") or 0),
+                        float(summary.get("trusted_source_pct") or 0),
+                        float(summary.get("high_quality_pct") or 0),
+                        int(scheduler_rollup.get("urls_attempted") or 0),
+                        int(scheduler_rollup.get("records_inserted") or 0),
+                        int(scheduler_rollup.get("url_failures") or 0),
+                    ),
+                )
+                row = cursor.fetchone()
+                connection.commit()
+                return int(row[0])
+
+    def list_data_quality_history(self, limit: int = 30) -> list[dict]:
+        sql = """
+        SELECT
+            id,
+            captured_at,
+            source,
+            run_id,
+            total_precedent_records,
+            trusted_source_records,
+            high_quality_records,
+            rejected_or_low_quality_records,
+            trusted_source_pct,
+            high_quality_pct,
+            scheduler_urls_attempted,
+            scheduler_records_inserted,
+            scheduler_url_failures
+        FROM data_quality_history
+        ORDER BY captured_at DESC
+        LIMIT %s;
+        """
+
+        with self._connect() as connection:
+            with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute(sql, (limit,))
+                rows = [dict(row) for row in cursor.fetchall()]
+                return rows

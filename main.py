@@ -351,5 +351,28 @@ def scheduler_runs(limit: int = 30) -> dict:
 
 
 @app.get("/api/v1/admin/data-quality")
-def data_quality_dashboard() -> dict:
-    return legal_data_service.data_quality_summary()
+def data_quality_dashboard(capture_snapshot: bool = False) -> dict:
+    return legal_data_service.data_quality_summary(capture_snapshot=capture_snapshot, source="admin_dashboard")
+
+
+@app.get("/api/v1/admin/data-quality/history")
+def data_quality_history(limit: int = 30) -> dict:
+    rows = legal_data_service.list_data_quality_history(limit=limit)
+    normalized_rows: list[dict] = []
+    for row in rows:
+        captured = row.get("captured_at")
+        trusted_pct = row.get("trusted_source_pct")
+        high_quality_pct = row.get("high_quality_pct")
+        normalized_rows.append(
+            {
+                **row,
+                "captured_at": captured.isoformat() if hasattr(captured, "isoformat") else captured,
+                "trusted_source_pct": float(trusted_pct) if trusted_pct is not None else 0.0,
+                "high_quality_pct": float(high_quality_pct) if high_quality_pct is not None else 0.0,
+            }
+        )
+
+    return {
+        "count": len(normalized_rows),
+        "history": normalized_rows,
+    }

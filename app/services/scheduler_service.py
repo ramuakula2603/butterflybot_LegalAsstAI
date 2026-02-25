@@ -88,6 +88,11 @@ class DailyRefreshScheduler:
                 inserted_count=total_inserted,
                 failed_urls=failed_urls,
             )
+            self.legal_data_service.data_quality_summary(
+                capture_snapshot=True,
+                source="scheduler_run",
+                run_id=run_id,
+            )
 
             if failed_urls:
                 self.alert_service.send_failure_alert(
@@ -118,6 +123,11 @@ class DailyRefreshScheduler:
                 inserted_count=total_inserted,
                 failed_urls=failed_urls,
                 error_message=str(exc),
+            )
+            self.legal_data_service.data_quality_summary(
+                capture_snapshot=True,
+                source="scheduler_error",
+                run_id=run_id,
             )
 
             self.alert_service.send_failure_alert(
