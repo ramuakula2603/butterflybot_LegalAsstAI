@@ -3,13 +3,20 @@
     {
       "state": "telangana",
       "urls": [
-        "https://indiankanoon.org/doc/1033637/"
+        "https://indiankanoon.org/doc/1033637/",
+        "https://indiankanoon.org/doc/78536/",
+        "https://indiankanoon.org/doc/1199182/",
+        "https://indiankanoon.org/doc/1766147/",
+        "https://indiankanoon.org/doc/1494114/"
       ]
     },
     {
       "state": "andhra pradesh",
       "urls": [
-        "https://indiankanoon.org/doc/101371569/"
+        "https://indiankanoon.org/doc/78536/",
+        "https://indiankanoon.org/doc/1199182/",
+        "https://indiankanoon.org/doc/1766147/",
+        "https://indiankanoon.org/doc/1494114/"
       ]
     }
   ]
