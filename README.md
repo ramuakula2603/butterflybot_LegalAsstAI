@@ -34,7 +34,13 @@ Production-focused legal assistant for Andhra Pradesh and Telangana with real-da
 pip install -r requirements.txt
 ```
 
-3. Ensure PostgreSQL is running and env vars are set (or use defaults used by this project):
+3. Create env file from template:
+
+```bash
+cp .env.example .env
+```
+
+4. Ensure PostgreSQL is running and env vars are set (or use defaults used by this project):
 
 - `POSTGRES_HOST` (default `127.0.0.1`)
 - `POSTGRES_PORT` (default `5432`)
@@ -42,10 +48,17 @@ pip install -r requirements.txt
 - `POSTGRES_USER` (default `postgres`)
 - `POSTGRES_PASSWORD` (default `pass`)
 
-4. Start API:
+5. Start API:
 
 ```bash
 uvicorn main:app --host 127.0.0.1 --port 8001
+```
+
+Alternative setup helper (Linux):
+
+```bash
+chmod +x deploy/deploy.sh
+./deploy/deploy.sh
 ```
 
 ## Access URLs

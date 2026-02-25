@@ -12,7 +12,13 @@ This document covers production deployment and operations for the AP/TS legal as
 
 ## 2) Required environment variables
 
-Set these before starting API:
+Bootstrap from template:
+
+```bash
+cp .env.example .env
+```
+
+Then set these before starting API:
 
 - `POSTGRES_HOST`
 - `POSTGRES_PORT`
@@ -23,12 +29,21 @@ Set these before starting API:
 - `LEGAL_LLM_MODEL` (optional)
 - `ALERT_WEBHOOK_URL` (optional alerts)
 
+`ALERT_ON_FAILURE` can be set to `true` to enable webhook alerts.
+
 ## 3) Initial setup
 
 ```bash
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+```
+
+Or run the helper script:
+
+```bash
+chmod +x deploy/deploy.sh
+./deploy/deploy.sh
 ```
 
 Run once to initialize DB schema via application startup.
@@ -49,8 +64,15 @@ Ready templates are included in the repo:
 
 - `deploy/systemd/butterflybot.service`
 - `deploy/nginx/butterflybot.conf`
+- `deploy/deploy.sh`
 
 Update paths/domain before use.
+
+One-command infra update:
+
+```bash
+./deploy/deploy.sh --with-systemd --with-nginx
+```
 
 ## 5) Reverse proxy
 
