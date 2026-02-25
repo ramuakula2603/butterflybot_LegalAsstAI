@@ -45,6 +45,13 @@ Recommended production command:
 gunicorn -k uvicorn.workers.UvicornWorker -w 2 -b 0.0.0.0:8001 main:app
 ```
 
+Ready templates are included in the repo:
+
+- `deploy/systemd/butterflybot.service`
+- `deploy/nginx/butterflybot.conf`
+
+Update paths/domain before use.
+
 ## 5) Reverse proxy
 
 Route HTTPS traffic to `127.0.0.1:8001`.
@@ -56,6 +63,25 @@ Expose:
 - `/api/v1/*`
 
 Restrict admin endpoints (`/api/v1/admin/*`) by IP or auth layer at proxy.
+
+### systemd setup
+
+```bash
+sudo cp deploy/systemd/butterflybot.service /etc/systemd/system/butterflybot.service
+sudo systemctl daemon-reload
+sudo systemctl enable butterflybot
+sudo systemctl start butterflybot
+sudo systemctl status butterflybot
+```
+
+### nginx setup
+
+```bash
+sudo cp deploy/nginx/butterflybot.conf /etc/nginx/sites-available/butterflybot.conf
+sudo ln -s /etc/nginx/sites-available/butterflybot.conf /etc/nginx/sites-enabled/butterflybot.conf
+sudo nginx -t
+sudo systemctl reload nginx
+```
 
 ## 6) Data quality guardrails
 
