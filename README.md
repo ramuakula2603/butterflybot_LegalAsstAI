@@ -61,6 +61,18 @@ chmod +x deploy/deploy.sh
 ./deploy/deploy.sh
 ```
 
+Alternative setup helper (Windows PowerShell):
+
+```powershell
+.\deploy\deploy.ps1
+```
+
+Run and start API in one step on Windows:
+
+```powershell
+.\deploy\deploy.ps1 -Run
+```
+
 ## Access URLs
 
 - UI: `http://127.0.0.1:8001/ui`

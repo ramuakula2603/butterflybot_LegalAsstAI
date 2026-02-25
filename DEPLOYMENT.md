@@ -46,6 +46,12 @@ chmod +x deploy/deploy.sh
 ./deploy/deploy.sh
 ```
 
+Windows PowerShell helper:
+
+```powershell
+.\deploy\deploy.ps1
+```
+
 Run once to initialize DB schema via application startup.
 
 ## 4) Start command
@@ -65,6 +71,7 @@ Ready templates are included in the repo:
 - `deploy/systemd/butterflybot.service`
 - `deploy/nginx/butterflybot.conf`
 - `deploy/deploy.sh`
+- `deploy/deploy.ps1`
 
 Update paths/domain before use.
 
@@ -72,6 +79,12 @@ One-command infra update:
 
 ```bash
 ./deploy/deploy.sh --with-systemd --with-nginx
+```
+
+Windows setup and run:
+
+```powershell
+.\deploy\deploy.ps1 -Run
 ```
 
 ## 5) Reverse proxy
