@@ -1,7 +1,7 @@
 param(
     [switch]$Run,
-    [string]$Host = "127.0.0.1",
-    [int]$Port = 8001
+    [string]$AppHost = "127.0.0.1",
+    [int]$AppPort = 8001
 )
 
 $ErrorActionPreference = "Stop"
@@ -35,10 +35,10 @@ if (-not (Test-Path $envFile)) {
 Write-Host "[4/4] Setup complete" -ForegroundColor Green
 
 if ($Run) {
-    Write-Host "Starting API on $Host`:$Port" -ForegroundColor Cyan
+    Write-Host "Starting API on $AppHost`:$AppPort" -ForegroundColor Cyan
     Set-Location $rootDir
-    & $pythonExe -m uvicorn main:app --host $Host --port $Port
+    & $pythonExe -m uvicorn main:app --host $AppHost --port $AppPort
 } else {
     Write-Host "Run API manually:" -ForegroundColor Green
-    Write-Host "  .\venv\Scripts\python.exe -m uvicorn main:app --host $Host --port $Port"
+    Write-Host "  .\venv\Scripts\python.exe -m uvicorn main:app --host $AppHost --port $AppPort"
 }
